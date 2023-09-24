@@ -39,7 +39,7 @@ if essay_prompt:
 
         essay = generate_essay(full_prompt, tokens)
         st.write(essay)
-This approach will ask the user for their general essay prompt, then provide more input fields based on this prompt. Finally, once all details are filled in, the user can specify the word count and generate the essay.
+
 
 
 
