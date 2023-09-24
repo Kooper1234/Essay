@@ -30,9 +30,11 @@ if essay_prompt and not st.session_state.initialized:
     st.session_state.questions = cached_generate_questions(essay_prompt)
     st.session_state.initialized = True
 
+
 details = []
-for q in st.session_state.questions:
-    answer = st.text_input(q)
+for idx, q in enumerate(st.session_state.questions):
+    key = f"input_{idx}_{q}"  # Create a unique key for each question
+    answer = st.text_input(q, key=key)
     if answer:
         details.append(answer)
 def generate_essay(prompt, max_tokens):
