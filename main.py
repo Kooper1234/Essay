@@ -6,7 +6,7 @@ import os
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 def generate_questions(prompt):
-    question_prompt = f"Given the essay topic '{prompt}', what are some specific questions that can help in generating a detailed and comprehensive essay?"
+    question_prompt = f"Given the essay topic '{prompt}', what are some personal and introspective questions that can help in creating a detailed and custom essay? Avoid asking for facts or methods."
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt=question_prompt,
