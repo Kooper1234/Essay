@@ -1,7 +1,9 @@
 import streamlit as st
 import openai
 import os
-openai.api_key = os.environ.get["OPENAI_API_KEY"]
+
+# Set the API key (Assuming you've set it in your environment variables on Streamlit Cloud)
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 def generate_questions(prompt):
     question_prompt = f"Given the essay topic '{prompt}', what are some specific questions that can help in generating a detailed and comprehensive essay?"
@@ -48,7 +50,6 @@ if essay_prompt:
         full_prompt = f"Based on the theme '{essay_prompt}', considering the following specifics: " + ' '.join(details) + "\n\nWrite an essay:\n"
         essay = generate_essay(full_prompt, tokens)
         st.write(essay)
-
 
 
 
