@@ -1,6 +1,6 @@
-openai.api_key = 'OPENAI_API_KEY'
 import streamlit as st
 import openai
+openai.api_key = 'OPENAI_API_KEY'
 
 def generate_essay(prompt):
     response = openai.Completion.create(
