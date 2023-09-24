@@ -1,76 +1,55 @@
 import streamlit as st
 import openai
-import os
 
-# Set the API key (Assuming you've set it in your environment variables on Streamlit Cloud)
+# Set up the OpenAI API Key
 openai.api_key = st.secrets["OPENAI_API_KEY"]
-
-if 'initialized' not in st.session_state:
-    st.session_state.initialized = False
-    st.session_state.questions = []
 
 @st.cache(allow_output_mutation=True, suppress_st_warning=True)
 def cached_generate_questions(prompt):
-    question_prompt = f"Given the essay topic '{prompt}', what are some personal and introspective questions that can help in creating a detailed and custom essay? Avoid asking for facts or methods."
+    question_prompt = f"Given the essay topic '{prompt}', what are some personal and introspective questions that can help in crafting a detailed and custom essay? Avoid asking for facts or methods."
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt=question_prompt,
         temperature=0.5,
-        max_tokens=150  # Limiting tokens for generating questions
+        max_tokens=150
     )
     return [q.strip() for q in response.choices[0].text.split('\n') if q]
 
-# Streamlit Interface
-st.title('College Essay Generator')
-
-# Step 1: Get the main essay prompt
-essay_prompt = st.text_input('Please enter the general essay prompt or theme:')
-
-if essay_prompt and not st.session_state.initialized:
-    st.session_state.questions = cached_generate_questions(essay_prompt)
-    st.session_state.initialized = True
-
-
-details = []
-for idx, q in enumerate(st.session_state.questions):
-    key = f"input_{idx}_{q}"  # Create a unique key for each question
-    answer = st.text_input(q, key=key)
-    if answer:
-        details.append(answer)
-def generate_essay(prompt, max_tokens):
+def generate_essay(prompt, details, word_count):
+    detail_string = ". ".join(details)
+    essay_prompt = f"Write an essay on the topic: '{prompt}'. Consider the following personal insights: {detail_string}. The essay should be approximately {word_count} words."
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=prompt,
-        temperature=0.5,
-        max_tokens=max_tokens
+        prompt=essay_prompt,
+        temperature=0.7,
+        max_tokens=word_count * 5  # Assuming an average of 5 tokens per word
     )
     return response.choices[0].text.strip()
 
 # Streamlit Interface
 st.title('College Essay Generator')
 
-# Step 1: Get the main essay prompt
+# Get the main essay prompt
 essay_prompt = st.text_input('Please enter the general essay prompt or theme:')
 
+# Generate questions if not done already
+if 'questions' not in st.session_state or essay_prompt != st.session_state.get("previous_prompt", ""):
+    st.session_state.questions = cached_generate_questions(essay_prompt)
+    st.session_state.previous_prompt = essay_prompt
+
 details = []
-if essay_prompt:
-    # Step 2: Use AI to generate specific questions based on the main prompt
-    questions = generate_questions(essay_prompt)
-    
-    for q in questions:
-        answer = st.text_input(q)
-        if answer:
-            details.append(answer)
+for idx, q in enumerate(st.session_state.questions):
+    key = f"input_{idx}_{q}"
+    answer = st.text_input(q, key=key)
+    if answer:
+        details.append(answer)
 
-    # Step 3: Ask for word count
-    word_count = st.number_input('How many words should the essay be?', min_value=50, max_value=1000, value=500, step=50)
-    tokens = int(word_count * 1.5)  # Rough token estimate
+# Ask for word count
+word_count = st.number_input("How many words should the essay be?", min_value=100, value=500, step=50)
 
-    # Step 4: If all details are provided, generate the essay
-    if len(details) == len(questions):  # All questions answered
-        full_prompt = f"Based on the theme '{essay_prompt}', considering the following specifics: " + ' '.join(details) + "\n\nWrite an essay:\n"
-        essay = generate_essay(full_prompt, tokens)
-        st.write(essay)
+if st.button("Generate Essay"):
+    essay = generate_essay(essay_prompt, details, word_count)
+    st.text_area("Generated Essay:", value=essay, height=300)
 
 
 
