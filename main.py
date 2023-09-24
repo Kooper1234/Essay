@@ -5,6 +5,9 @@ import os
 # Set the API key (Assuming you've set it in your environment variables on Streamlit Cloud)
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
+if 'questions' not in st.session_state:
+    st.session_state.questions = []
+
 def generate_questions(prompt):
     question_prompt = f"Given the essay topic '{prompt}', what are some personal and introspective questions that can help in creating a detailed and custom essay? Avoid asking for facts or methods."
     response = openai.Completion.create(
@@ -13,8 +16,22 @@ def generate_questions(prompt):
         temperature=0.5,
         max_tokens=150  # Limiting tokens for generating questions
     )
-    # Splitting the response to get individual questions
     return [q.strip() for q in response.choices[0].text.split('\n') if q]
+
+# Streamlit Interface
+st.title('College Essay Generator')
+
+# Step 1: Get the main essay prompt
+essay_prompt = st.text_input('Please enter the general essay prompt or theme:')
+
+if essay_prompt and not st.session_state.questions:
+    st.session_state.questions = generate_questions(essay_prompt)
+
+details = []
+for q in st.session_state.questions:
+    answer = st.text_input(q)
+    if answer:
+        details.append(answer)
 
 def generate_essay(prompt, max_tokens):
     response = openai.Completion.create(
