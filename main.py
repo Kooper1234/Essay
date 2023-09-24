@@ -1,6 +1,6 @@
 import streamlit as st
 import openai
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_key = os.environ.get["OPENAI_API_KEY"]
 
 def generate_questions(prompt):
     question_prompt = f"Given the essay topic '{prompt}', what are some specific questions that can help in generating a detailed and comprehensive essay?"
