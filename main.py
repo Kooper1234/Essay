@@ -1,5 +1,6 @@
 import streamlit as st
 import openai
+import os
 openai.api_key = os.environ.get["OPENAI_API_KEY"]
 
 def generate_questions(prompt):
