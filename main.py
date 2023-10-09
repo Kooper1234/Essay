@@ -4,17 +4,6 @@ import openai
 # Set up the OpenAI API Key
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
-def cached_generate_questions(prompt):
-    question_prompt = f"Given the essay topic '{prompt}', what are some personal and introspective questions that can help in crafting a detailed and custom essay? Avoid asking for facts or methods."
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=question_prompt,
-        temperature=0.5,
-        max_tokens=150
-    )
-    return [q.strip() for q in response.choices[0].text.split('\n') if q]
-
 def generate_essay(prompt, details, word_count):
     detail_string = ". ".join(details)
     essay_prompt = f"Write an essay on the topic: '{prompt}'. Consider the following personal insights: {detail_string}. The essay should be approximately {word_count} words."
@@ -32,14 +21,18 @@ st.title('College Essay Generator')
 # Get the main essay prompt
 essay_prompt = st.text_input('Please enter the general essay prompt or theme:')
 
-# Generate questions if not done already
-if 'questions' not in st.session_state or essay_prompt != st.session_state.get("previous_prompt", ""):
-    st.session_state.questions = cached_generate_questions(essay_prompt)
-    st.session_state.previous_prompt = essay_prompt
+# Set of predefined questions
+predefined_questions = [
+    "What personal experience deeply influenced your viewpoint on this topic?",
+    "How has this topic impacted your life or the lives of those around you?",
+    "Why is this topic personally significant to you?",
+    "Describe a challenge you faced related to this topic and how you overcame it.",
+    "What emotions does this topic evoke for you?"
+]
 
 details = []
-for idx, q in enumerate(st.session_state.questions):
-    key = f"input_{idx}_{q}"
+for idx, q in enumerate(predefined_questions):
+    key = f"input_{idx}"
     answer = st.text_input(q, key=key)
     if answer:
         details.append(answer)
