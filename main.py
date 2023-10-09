@@ -6,7 +6,7 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 def generate_essay(prompt, details, word_count):
     detail_string = ". ".join(details)
-    essay_prompt = f"Write an essay on the topic: '{prompt}'. Consider the following personal insights: {detail_string}. The essay should be approximately {word_count} words."
+    essay_prompt = f"Generate a college application essay based on the prompt: '{prompt}'. Act as a scholarly highschool student who is going into their senior year is writing essays for college applications. Personalize your essay by incorporating personal details from; {detail_string}. The essay should be approximately {word_count} words."
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt=essay_prompt,
